@@ -1,0 +1,82 @@
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container" style="margin-top: 80px">
+        <h2>Kitchen Dashboard</h2>
+        <hr>
+        <table class="table" style="margin-bottom: 100px">
+            <thead class="thead-light">
+            <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Food Item</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Created</th>
+                <th scope="col">Action</th>
+            </tr>
+            </thead>
+            <tbody class="append-location">
+            {% for order in orders %}
+                <tr class="order">
+                    <th scope="row">{{ order.order_number }}</th>
+                    <td>{{ order.food_choice_display }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td class="time">{{ order.isoformat }}</td>
+                    <td>
+                        <button onclick="fulfillOrder(this)" data-order-id="{{ order.order_number }}"
+                                class="btn btn-success"
+                                {% if not request.user.is_kitchen %}disabled{% endif %}>Fulfill Order
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+      const timestamps = document.querySelectorAll('.time')
+      timestamps.forEach(e => {
+        e.textContent = moment(e.textContent).fromNow()
+      })
+
+
+      const websocket = new WebSocket('ws://' + window.location.host + '/ws/order')
+      let orderRows = document.querySelectorAll(".order")
+      const appendLocation = document.querySelector(".append-location")
+
+      websocket.onclose = error => {
+        console.log("Error")
+      }
+
+      websocket.onopen = response => {
+        console.log('connected')
+      }
+
+      websocket.onmessage = response => {
+        const data = JSON.parse(response.data)
+        if (data.action === 'take-order') {
+          appendLocation.insertAdjacentHTML('afterbegin', `
+                    <tr class="order">
+                        <th scope="row">${data.order_id}</th>
+                        <td>${data.food_name}</td>
+                        <td>${data.quantity}</td>
+                        <td class="time">${moment(data.created_on).fromNow()}</td>
+                        <td>
+                          <button onclick="fulfillOrder(this)" data-order-id=${data.order_id} class="btn btn-success"
+            {% if not request.user.is_kitchen %}disabled{% endif %}>Fulfill Order</button>
+                        </td>
+                    </tr>`
+          )
+        } else if (data.action === 'fulfill-order') {
+          orderRows = document.querySelectorAll(".order")
+          const toRemove = Array.from(orderRows).find(e => e.children[0].textContent === data.order_id)
+          toRemove.remove()
+        }
+      }
+
+      const fulfillOrder = element => {
+        websocket.send(JSON.stringify({action: 'fulfill-order', order_id: element.dataset.orderId}))
+      }
+    </script>
+{% endblock %}

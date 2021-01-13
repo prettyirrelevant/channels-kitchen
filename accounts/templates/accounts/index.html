@@ -1,0 +1,7 @@
+{% extends 'accounts/base.html' %}
+{% block content %}
+    <div class="container" style="margin-top: 140px">
+        <a type="button" class="btn btn-primary btn-lg btn-block" href="{% url 'orders-page' %}">View all Orders</a>
+        <a type="button" class="btn btn-secondary btn-lg btn-block" href="{% url 'manager-signup' %}">I'm a Manager</a>
+    </div>
+{% endblock %}

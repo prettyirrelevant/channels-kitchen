@@ -1,0 +1,13 @@
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container" style="margin-top: 100px">
+        <h3>Login</h3>
+        <hr>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success btn-lg btn-block mb-2">Login</button>
+        </form>
+    </div>
+{% endblock %}

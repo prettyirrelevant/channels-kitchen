@@ -1,0 +1,14 @@
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container" style="margin-top: 100px">
+        <h3>Sign Up as {{ type_of_user }}</h3>
+        <hr>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success btn-lg btn-block mb-2">Signup</button>
+            <p>Already created an account? Click<a href="{% url 'login' %}"> here</a></p>
+        </form>
+    </div>
+{% endblock %}

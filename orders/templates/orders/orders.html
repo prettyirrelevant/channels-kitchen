@@ -1,0 +1,74 @@
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container" style="margin-top: 80px">
+        <h3>Orders</h3>
+        <hr>
+        <table class="table" style="margin-bottom: 100px">
+            <thead class="thead-light">
+            <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Food Item</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created</th>
+            </tr>
+            </thead>
+            <tbody class="append-location">
+            {% for order in orders %}
+                <tr class="order">
+                    <th scope="row">{{ order.order_number }}</th>
+                    <td>{{ order.food_choice_display }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ order.status_display }}</td>
+                    <td class="time">{{ order.isoformat }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button class="create-order btn btn-warning btn-lg btn-block mb-5">Create Order</button>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+      const timestamps = document.querySelectorAll('.time')
+      timestamps.forEach(e => {
+        e.textContent = moment(e.textContent).fromNow()
+      })
+
+
+      const appendLocation = document.querySelector(".append-location")
+      const websocket = new WebSocket('ws://' + window.location.host + '/ws/order')
+      let orderRows = document.querySelectorAll(".order")
+      const createOrder = document.querySelector('.create-order')
+
+      websocket.onclose = error => {
+        console.log("error")
+      }
+
+      websocket.onopen = response => {
+        console.log('connected')
+      }
+
+      websocket.onmessage = response => {
+        const data = JSON.parse(response.data)
+        if (data.action === 'create-order') {
+          appendLocation.insertAdjacentHTML('afterbegin', `<tr class="order">
+                        <th scope="row">${data.order_id}</th>
+                        <td>${data.food_name}</td>
+                        <td>${data.quantity}</td>
+                        <td>${data.status}</td>
+                        <td class="time">${moment(data.created_on).fromNow()}</td>
+                    </tr>`)
+        } else {
+          orderRows = document.querySelectorAll(".order")
+          const toUpdate = Array.from(orderRows).find(e => e.children[0].textContent === data.order_id)
+          toUpdate.children[3].textContent = data.status
+        }
+      }
+
+      createOrder.addEventListener('click', e => {
+        websocket.send(JSON.stringify({action: 'create-order'}))
+      })
+    </script>
+{% endblock %}

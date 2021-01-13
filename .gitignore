@@ -1,0 +1,5 @@
+*.rdb
+.idea
+venv
+*.sqlite3
+__pycache__
