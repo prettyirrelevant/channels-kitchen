@@ -48,7 +48,7 @@ class KitchenListView(ListView):
 @method_decorator([login_required, manager_required], name="dispatch")
 class KitchenCreateView(CreateView):
     model = User
-    template_name = "accounts/create.html"
+    template_name = "accounts/staff_create.html"
     form_class = KitchenCreationForm
     success_url = reverse_lazy("manager-page")
 
@@ -67,7 +67,7 @@ class CounterListView(ListView):
 @method_decorator([login_required, manager_required], name="dispatch")
 class CounterCreateView(CreateView):
     model = User
-    template_name = "accounts/create.html"
+    template_name = "accounts/staff_create.html"
     form_class = CounterCreationForm
     success_url = reverse_lazy("manager-page")
 
