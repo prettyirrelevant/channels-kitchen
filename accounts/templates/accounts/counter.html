@@ -41,16 +41,14 @@
       })
 
 
-      const websocket = new WebSocket('ws://' + window.location.host + '/ws/order')
+      const websocket = new WebSocket('wss://' + window.location.host + '/ws/order')
       let orderRows = document.querySelectorAll(".order")
       const appendLocation = document.querySelector(".append-location")
 
       websocket.onclose = error => {
-        console.log("Error")
       }
 
       websocket.onopen = response => {
-        console.log('connected')
       }
 
       websocket.onmessage = response => {
